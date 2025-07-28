@@ -1,21 +1,43 @@
-import React from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
+import { Header } from './components/Header';
+import { Footer } from './components/Footer';
 import './App.scss';
+import { useEffect } from 'react';
+import { getAllProducts } from './api/products';
+import { productsSlice } from './utils/products';
+import { useAppDispatch } from './hooks/DispatchSelector';
 
-interface Props {
-  onClick: () => void;
-  children: React.ReactNode;
-}
+export const App = () => {
+  const dispatch = useAppDispatch();
+  const { pathname } = useLocation();
 
-export const Provider: React.FC<Props> = React.memo(({ onClick, children }) => (
-  <button type="button" onClick={onClick}>
-    {children}
-  </button>
-));
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth',
+    });
+  }, [pathname]);
 
-export const App: React.FC = () => {
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const products = await getAllProducts().then(response => response);
+
+        dispatch(productsSlice.actions.setProducts(products));
+      } catch (error) {}
+    };
+
+    fetchProducts();
+  }, [dispatch]);
+
   return (
-    <div className="starter">
-      <Provider onClick={() => ({})}>TodoList</Provider>
-    </div>
+    <>
+      <Header />
+      <main className="container">
+        <Outlet />
+      </main>
+      <Footer />
+    </>
   );
 };
